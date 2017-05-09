@@ -9,6 +9,7 @@ Please note: The combination of slow control and data aquisition has several dra
 | ------ | ----------- |
 | `SET $CH, $THR`| Set the potentiometer value of channel `$CH` to threshold `$THR`. |
 | `SCAN $CH`| Scan the potentiometer value of channel `$CH` by increasing one step at each tick. |
+| `SETTTIME $INTTIME`| Set integrating time interval to `$INTTIME` (in milliseconds). |
 
 # Output
 Example:

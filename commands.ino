@@ -25,7 +25,10 @@ String getValue(String data, char separator, int index)
 
 void handle_commands() {
   if (stringComplete) {
-    if (inputString.startsWith("SET")) {
+    if (inputString.startsWith("SETTIME")) {
+      const long time = getValue(inputString.substring(8), ',', 0).toInt();
+      integration_time = time;
+    } else if (inputString.startsWith("SET")) {
       // set potentiometer values
       const byte channel = (byte) (getValue(inputString.substring(4), ',', 0).toInt());
       const byte value = (byte) (getValue(inputString.substring(4), ',', 1).toInt());
