@@ -14,6 +14,10 @@ typedef enum {
 
 mode_t mode[channels] = {constant};
 
+//#include <commands.ino>
+void setup_potentiometer();
+uint16_t sendCommand(byte control, byte address, byte data);
+
 void setup() {
   Serial.begin(9600);
   Serial.println("SiPMTrigger v4 Control v0.2");
