@@ -20,3 +20,7 @@ Example:
 
 The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate of the signal on pin 2 of the arduino in the last integration time interval.
 Channel 2 and 3 of the digital potentiometer correspond to the threshold setting of signal channel 1 and to 2 on the SiPMTrigger board (to be confirmed!).
+
+## License
+
+Licensed under the [GPLv3](LICENSE) or later.
