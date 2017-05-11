@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased
+
+## 0.3
 - Replaced command `SET $CH, $THR` by `SET THR $CH, $THR` and `SET WIDTH $CH, $THR`.
 - Replaced command `SCAN $CH` by `SCAN THR` to scan both treshold channels simultaneously.
 - Added trigger event sum to serial output.

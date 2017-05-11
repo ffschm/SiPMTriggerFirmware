@@ -22,7 +22,7 @@ uint16_t sendCommand(byte control, byte address, byte data);
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("SiPMTrigger v4 Control v0.2");
+  Serial.println("SiPMTrigger v4 Control v0.3");
 
   setup_potentiometer();
   setup_commands();
