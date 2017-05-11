@@ -1,4 +1,6 @@
 volatile unsigned long irq_count;
+unsigned long counts_sum = 0;
+
 const int input_pin = 2;
 
 unsigned long integration_time = 1000;
@@ -65,12 +67,15 @@ unsigned long count_interrupts() {
 }
 
 void print_interrupts(const unsigned long counts) {
+  counts_sum += counts;
 
   for (size_t channel = 0; channel < channels; channel++) {
     Serial.print(threshold[channel]);
     Serial.print(",");
   }
-  Serial.println(counts);
+  Serial.print(counts);
+  Serial.print(",");
+  Serial.println(counts_sum);
 }
 
 void IRQCounter() {

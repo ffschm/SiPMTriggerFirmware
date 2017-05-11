@@ -14,12 +14,16 @@ Please note: The combination of slow control and data aquisition has several dra
 # Output
 Example:
 ```
-128,128,128,128,0
-128,128,128,128,0
-128,128,128,128,0
+128,128,128,128,0,0
+128,128,128,128,0,0
+128,128,128,128,1,1
+128,128,128,128,0,1
+128,128,128,128,0,1
+128,128,128,128,2,3
+128,128,128,128,0,3
 ```
 
-The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate of the signal on pin 2 of the arduino in the last integration time interval.
+The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate of the signal on pin 2 of the arduino in the last integration time interval and the sum of all trigger events.
 Channel 2 and 3 of the digital potentiometer correspond to the threshold setting of signal channel 1 and to 2 on the SiPMTrigger board (to be confirmed!).
 
 | Potentiometer channel | Function |
