@@ -7,9 +7,10 @@ Please note: The combination of slow control and data aquisition has several dra
 
 | Comand | Description |
 | ------ | ----------- |
-| `SET $CH, $THR`| Set the potentiometer value of channel `$CH` to threshold `$THR`. |
-| `SCAN $CH`| Scan the potentiometer value of channel `$CH` by increasing one step at each tick. |
-| `SETTIME $INTTIME`| Set integrating time interval to `$INTTIME` (in milliseconds). |
+| `SET THR $CH, $THR`| Set the threshold of signal channel `$CH` to `$THR`. |
+| `SET WIDTH $CH, $VAL`| Set the voltage divider controlling the latch of signal channel `$CH` to `$VAL`. |
+| `SCAN THR`| Scan the threshold of both signal channels simultaneously by increasing them one step at each tick. |
+| `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
 
 # Output
 Example:

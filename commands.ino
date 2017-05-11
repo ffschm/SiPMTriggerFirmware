@@ -1,6 +1,17 @@
 String inputString = "";
 boolean stringComplete = false;
 
+// Mapping for SiPMTrigger v4
+enum pot_channels {
+  CH1_THR = 2,
+  CH2_THR = 1,
+  CH1_WIDTH = 0,
+  CH2_WIDTH = 3
+};
+const byte threshold_channel[2] = {2, 1};
+const byte width_channel[2] = {0, 3};
+
+
 void setup_commands() {
   // Reserve bytes for the input string
   inputString.reserve(20);
@@ -25,30 +36,38 @@ String getValue(String data, char separator, int index)
 
 void handle_commands() {
   if (stringComplete) {
-    if (inputString.startsWith("SETTIME")) {
+    if (inputString.startsWith("SET TIME")) {
       const long time = getValue(inputString.substring(8), ',', 0).toInt();
       integration_time = time;
-    } else if (inputString.startsWith("SET")) {
-      // set potentiometer values
-      const byte channel = (byte) (getValue(inputString.substring(4), ',', 0).toInt());
-      const byte value = (byte) (getValue(inputString.substring(4), ',', 1).toInt());
-      if (0 <= channel && channel <= 4) {
+    } else if (inputString.startsWith("SET THR")) {
+      const byte channel = (byte) (getValue(inputString.substring(8), ',', 0).toInt());
+      const byte value = (byte) (getValue(inputString.substring(8), ',', 1).toInt());
+      if (1 <= channel && channel <= 2) {
         if (0 <= value  && value <= 255) {
-          mode[channel] = updated;
-          threshold[channel] = value;
+          mode[threshold_channel[channel-1]] = updated;
+          threshold[threshold_channel[channel-1]] = value;
         } else {
           Serial.print("# SET command failed: Invalid value.");
         }
       } else {
         Serial.print("# SET command failed: Invalid channel.");
       }
-    } else if (inputString.startsWith("SCAN")) {
-      const byte channel = (byte) (getValue(inputString.substring(4), ',', 0).toInt());
-      if (0 <= channel && channel <= 4) {
-        mode[channel] = scanning;
+    } else if (inputString.startsWith("SET WIDTH")) {
+      const byte channel = (byte) (getValue(inputString.substring(10), ',', 0).toInt());
+      const byte value = (byte) (getValue(inputString.substring(10), ',', 1).toInt());
+      if (1 <= channel && channel <= 2) {
+        if (0 <= value  && value <= 255) {
+          mode[width_channel[channel-1]] = updated;
+          threshold[width_channel[channel-1]] = value;
+        } else {
+          Serial.print("# SET command failed: Invalid value.");
+        }
       } else {
-        Serial.print("# SCAN command failed: Invalid channel.");
+        Serial.print("# SET command failed: Invalid channel.");
       }
+    } else if (inputString.startsWith("SCAN THR")) {
+        mode[CH1_THR] = scanning;
+        mode[CH2_THR] = scanning;
     }
     inputString = "";
     stringComplete = false;
