@@ -64,5 +64,5 @@ void print_interrupts(const unsigned long counts) {
     Serial.print(threshold[channel]);
     Serial.print(",");
   }
-  Serial.println(counts);
+  Serial.println(counts*(1000/integration_time));
 }

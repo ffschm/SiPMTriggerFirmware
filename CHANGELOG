@@ -4,6 +4,7 @@
 - Use FreqCount instead of self-written function based on delay to measure the frequency.
   The frequency input is on pin 47 instead of pin 2 (Arduino MEGA) now, the interrupt handler
   captures rising edges on this pin.
+- Print calculated frequency in Hertz independent of the configured integration time.
 
 ## 0.3
 - Replaced command `SET $CH, $THR` by `SET THR $CH, $THR` and `SET WIDTH $CH, $THR`.
