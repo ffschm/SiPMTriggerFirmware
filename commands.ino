@@ -39,6 +39,8 @@ void handle_commands() {
     if (inputString.startsWith("SET TIME")) {
       const long time = getValue(inputString.substring(8), ',', 0).toInt();
       integration_time = time;
+      FreqCount.end();
+      FreqCount.begin(integration_time);
     } else if (inputString.startsWith("SET THR")) {
       const byte channel = (byte) (getValue(inputString.substring(8), ',', 0).toInt());
       const byte value = (byte) (getValue(inputString.substring(8), ',', 1).toInt());

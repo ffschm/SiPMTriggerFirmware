@@ -1,7 +1,9 @@
+#include <FreqCount.h>
+
 volatile unsigned long irq_count;
 unsigned long counts_sum = 0;
 
-const int input_pin = 2;
+// const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
 
@@ -22,19 +24,22 @@ uint16_t sendCommand(byte control, byte address, byte data);
 
 void setup() {
   Serial.begin(9600);
+  FreqCount.begin(integration_time);
   Serial.println("SiPMTrigger v4 Control v0.3");
 
   setup_potentiometer();
   setup_commands();
-
-  attachInterrupt(digitalPinToInterrupt(input_pin), IRQCounter, FALLING);
 }
 
 void loop() {
   handle_commands();
   set_thresholds();
-  const unsigned long counts = count_interrupts();
-  print_interrupts(counts);
+  while (!FreqCount.available()) {
+    delay(1);
+  }
+  const unsigned long count = FreqCount.read();
+
+  print_interrupts(count);
 }
 
 void set_thresholds() {
@@ -52,20 +57,6 @@ void set_thresholds() {
   }
 }
 
-unsigned long count_interrupts() {
-  cli();
-  irq_count = 0;
-  sei();
-  
-  delay(integration_time);
-  
-  cli();
-  const unsigned long _irq_count = irq_count;
-  sei();
-
-  return _irq_count;
-}
-
 void print_interrupts(const unsigned long counts) {
   counts_sum += counts;
 
@@ -73,11 +64,5 @@ void print_interrupts(const unsigned long counts) {
     Serial.print(threshold[channel]);
     Serial.print(",");
   }
-  Serial.print(counts);
-  Serial.print(",");
-  Serial.println(counts_sum);
-}
-
-void IRQCounter() {
-  irq_count++;
+  Serial.println(counts);
 }
