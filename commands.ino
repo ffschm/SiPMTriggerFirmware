@@ -1,5 +1,7 @@
-String inputString = "";
-boolean stringComplete = false;
+#include <SerialCommand.h>
+#include <limits.h>
+
+SerialCommand sCmd;
 
 // Mapping for SiPMTrigger v4
 enum pot_channels {
@@ -13,76 +15,67 @@ const byte width_channel[2] = {0, 3};
 
 
 void setup_commands() {
-  // Reserve bytes for the input string
-  inputString.reserve(20);
-}
-
-// Source: https://arduino.stackexchange.com/a/1237
-String getValue(String data, char separator, int index)
-{
-    int found = 0;
-    int strIndex[] = { 0, -1 };
-    int maxIndex = data.length() - 1;
-
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
-        if (data.charAt(i) == separator || i == maxIndex) {
-            found++;
-            strIndex[0] = strIndex[1] + 1;
-            strIndex[1] = (i == maxIndex) ? i+1 : i;
-        }
-    }
-    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+  sCmd.addCommand("SET TIME", command_set_time);
+  sCmd.addCommand("SET THR", command_set_thr);
+  sCmd.addCommand("SET WIDTH", command_set_width);
+  sCmd.addCommand("SCAN THR", command_scan_thr);
+  sCmd.setDefaultHandler(command_unrecognized);
 }
 
 void handle_commands() {
-  if (stringComplete) {
-    if (inputString.startsWith("SET TIME")) {
-      const long time = getValue(inputString.substring(8), ',', 0).toInt();
-      integration_time = time;
-      FreqCount.end();
-      FreqCount.begin(integration_time);
-    } else if (inputString.startsWith("SET THR")) {
-      const byte channel = (byte) (getValue(inputString.substring(8), ',', 0).toInt());
-      const byte value = (byte) (getValue(inputString.substring(8), ',', 1).toInt());
-      if (1 <= channel && channel <= 2) {
-        if (0 <= value  && value <= 255) {
-          mode[threshold_channel[channel-1]] = updated;
-          threshold[threshold_channel[channel-1]] = value;
-        } else {
-          Serial.print("# SET command failed: Invalid value.");
-        }
-      } else {
-        Serial.print("# SET command failed: Invalid channel.");
-      }
-    } else if (inputString.startsWith("SET WIDTH")) {
-      const byte channel = (byte) (getValue(inputString.substring(10), ',', 0).toInt());
-      const byte value = (byte) (getValue(inputString.substring(10), ',', 1).toInt());
-      if (1 <= channel && channel <= 2) {
-        if (0 <= value  && value <= 255) {
-          mode[width_channel[channel-1]] = updated;
-          threshold[width_channel[channel-1]] = value;
-        } else {
-          Serial.print("# SET command failed: Invalid value.");
-        }
-      } else {
-        Serial.print("# SET command failed: Invalid channel.");
-      }
-    } else if (inputString.startsWith("SCAN THR")) {
-        mode[CH1_THR] = scanning;
-        mode[CH2_THR] = scanning;
-    }
-    inputString = "";
-    stringComplete = false;
+  sCmd.readSerial();
+}
+
+template<typename T> parse_integer(const T min=0,          // std::numeric_limits<T>::min(),
+                                   const T max=LONG_MAX) { //std::numeric_limits<T>::max()) {
+  const char *arg = sCmd.next();
+  if (arg == NULL) {
+    Serial.println("# command failed: Argument missing.");
+    return NULL;
+  }
+
+  T value;
+  sscanf(arg, "%d", &value);
+
+  if (min <= value && value <= max) {
+    return value;
+  } else {
+    Serial.println("# command failed: Invalid argument.");
+    return NULL;
   }
 }
 
-void serialEvent() {
-  while (Serial.available()) {
-    char inChar = (char) Serial.read();
-    inputString += inChar;
-
-    if (inChar == '\n') {
-      stringComplete = true;
-    }
+void command_set_time() {
+  const long time = parse_integer<long>();
+  if (time != NULL) {
+    integration_time = time;
+    FreqCount.end();
+    FreqCount.begin(integration_time);
   }
+}
+
+void command_set_thr() {
+  const byte channel = parse_integer<byte>(1, 2);
+  const byte value = parse_integer<byte>(0, 255);
+
+  mode[threshold_channel[channel-1]] = updated;
+  threshold[threshold_channel[channel-1]] = value;
+}
+
+void command_set_width() {
+  const byte channel = parse_integer<byte>(1, 2);
+  const byte value = parse_integer<byte>(0, 255);
+
+  mode[width_channel[channel-1]] = updated;
+  threshold[width_channel[channel-1]] = value;
+}
+
+void command_scan_thr() {
+  mode[CH1_THR] = scanning;
+  mode[CH2_THR] = scanning;
+}
+
+void command_unrecognized(const char *c) {
+  Serial.print("# Unknown command: ");
+  Serial.println(c);
 }
