@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Added commands `SET PE GAIN $CH, $VAL` and `SET PE THR $CH, $PETHR`.
 
 ## 0.4
 - Use FreqCount instead of self-written function based on delay to measure the frequency.

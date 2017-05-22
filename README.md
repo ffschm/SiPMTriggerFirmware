@@ -10,6 +10,8 @@ Please note: The combination of slow control and data aquisition has several dra
 | `SET THR $CH, $THR`| Set the threshold of signal channel `$CH` to `$THR`. |
 | `SET WIDTH $CH, $VAL`| Set the voltage divider controlling the latch of signal channel `$CH` to `$VAL`. |
 | `SCAN THR`| Scan the threshold of both signal channels simultaneously by increasing them one step at each tick. |
+| `SET PE GAIN $CH, $VAL`| Set the gain of signal channel `$CH` to `$VAL`. |
+| `SET PE THR $CH, $PETHR`| Set the threshold of signal channel `$CH` to `$PETHR * $GAIN`. |
 | `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
 
 # Output

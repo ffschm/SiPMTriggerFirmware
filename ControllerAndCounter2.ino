@@ -9,6 +9,8 @@ unsigned long integration_time = 1000;
 
 const size_t channels = 4;
 byte threshold[channels] = {128, 128, 128, 128};
+const size_t signal_channels = 2;
+double gain[signal_channels] = {40, 40};
 
 typedef enum {
   constant,
