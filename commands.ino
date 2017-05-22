@@ -22,6 +22,7 @@ void setup_commands() {
   sCmd.addCommand("SCAN THR", command_scan_thr);
   sCmd.addCommand("SET PE GAIN", command_set_pe_gain);
   sCmd.addCommand("SET PE THR", command_set_pe_thr);
+  sCmd.addCommand("SCAN PE THR", command_scan_pe_thr);
   sCmd.setDefaultHandler(command_unrecognized);
 }
 
@@ -118,6 +119,14 @@ void command_set_pe_thr() {
   } else {
     Serial.println("# command failed: Threshold out of range.");
   }
+}
+
+void command_scan_pe_thr() {
+  const double value = parse_double();
+  scanning_width = value;
+
+  mode[CH1_THR] = pe_scanning;
+  mode[CH2_THR] = pe_scanning;
 }
 
 void command_unrecognized(const char *c) {

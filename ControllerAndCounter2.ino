@@ -11,9 +11,11 @@ const size_t channels = 4;
 byte threshold[channels] = {128, 128, 128, 128};
 const size_t signal_channels = 2;
 double gain[signal_channels] = {40, 40};
+double scanning_width = 0.1;
 
 typedef enum {
   constant,
+  pe_scanning,
   scanning,
   updated
 } mode_t;
@@ -45,7 +47,7 @@ void loop() {
 }
 
 void set_thresholds() {
-  for (size_t channel = 0; channel < 4; channel++) {
+  for (size_t channel = 0; channel < channels; channel++) {
     if (mode[channel] == scanning) {
       threshold[channel]++;
       // Write contents of serial register data to RDAC
@@ -55,6 +57,19 @@ void set_thresholds() {
       // Write contents of serial register data to RDAC
       sendCommand(1, channel, threshold[channel]);
       mode[channel] = constant;
+    }
+    else if (mode[channel] == pe_scanning) {
+      const double thr = scanning_width * gain[channel];
+
+      if (0 <= thr && thr <= 255) {
+        threshold[channel] += thr;
+        // Write contents of serial register data to RDAC
+        sendCommand(1, channel, threshold[channel]);
+      } else {
+        for (size_t i = 0; i < signal_channels; i++) {
+          mode[i] = constant;
+        }
+      }
     }
   }
 }

@@ -12,6 +12,7 @@ Please note: The combination of slow control and data aquisition has several dra
 | `SCAN THR`| Scan the threshold of both signal channels simultaneously by increasing them one step at each tick. |
 | `SET PE GAIN $CH, $VAL`| Set the gain of signal channel `$CH` to `$VAL`. |
 | `SET PE THR $CH, $PETHR`| Set the threshold of signal channel `$CH` to `$PETHR * $GAIN`. |
+| `SCAN THR $STEPWIDTH`| Scan the thresholds of both signal channels simultaneously by increasing them by `$STEPWIDTH` at each tick. |
 | `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
 
 # Output
