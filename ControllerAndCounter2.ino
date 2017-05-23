@@ -30,8 +30,8 @@ uint16_t sendCommand(byte control, byte address, byte data);
 void setup() {
   Serial.begin(9600);
   FreqCount.begin(integration_time);
-  Serial.println("SiPMTrigger v4 Control v0.4");
-
+  Serial.println("# SiPMTrigger v4 Control v0.4");
+  Serial.println("# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts");
   setup_potentiometer();
   setup_commands();
 }
