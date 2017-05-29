@@ -94,14 +94,14 @@ void command_set_pe_gain() {
   const byte channel = parse_integer<byte>(1, signal_channels);
   const double value = parse_double();
 
-  gain[channel] = value;
+  gain[channel-1] = value;
 }
 
 void command_set_pe_thr() {
   const byte channel = parse_integer<byte>(1, signal_channels);
   const double value = parse_double();
 
-  const double thr = value * gain[channel];
+  const double thr = value * gain[channel-1];
   if (0 <= thr && thr <= 255) {
     mode[threshold_channel[channel-1]] = updated;
     threshold[threshold_channel[channel-1]] = thr;
