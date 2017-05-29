@@ -82,5 +82,11 @@ void print_interrupts(const unsigned long counts) {
     Serial.print(threshold[channel]);
     Serial.print(",");
   }
+
+  for (size_t channel = 0; channel < signal_channels; channel++) {
+    Serial.print(1.0*threshold[threshold_channel[channel]]/gain[channel]);
+    Serial.print(",");
+  }
+
   Serial.println(counts*(1000/integration_time));
 }
