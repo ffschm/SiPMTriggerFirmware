@@ -18,7 +18,7 @@ Please note: The combination of slow control and data aquisition has several dra
 # Output
 Example:
 ```
-# SiPMTrigger v4 Control v0.4
+# SiPMTrigger v4 Control v0.5
 # CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts
 128 128 128 128 3.20 3.20 0
 128 128 128 128 3.20 3.20 0

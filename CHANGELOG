@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased
+
+## 0.5
 - Added commands `SET PE GAIN $CH, $VAL` and `SET PE THR $CH, $PETHR`.
 - Use space as delimiter in the serial output.
 - Added the current threshold setting in photoelectrons to the serial output.
