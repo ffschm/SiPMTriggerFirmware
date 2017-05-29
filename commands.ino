@@ -29,7 +29,7 @@ template<typename T> parse_integer(const T min=0,          // std::numeric_limit
   }
 
   T value;
-  sscanf(arg, "%d", &value);
+  value = strtol(arg, NULL, 10);
 
   if (min <= value && value <= max) {
     return value;
@@ -48,8 +48,7 @@ double parse_double(const double min=-DBL_MAX,  // std::numeric_limits<T>::min()
   }
 
   double value;
-  char *end;
-  value = strtod(arg, &end);
+  value = strtod(arg, NULL);
 
   if (min <= value && value <= max) {
     return value;
