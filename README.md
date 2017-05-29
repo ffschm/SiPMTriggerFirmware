@@ -18,13 +18,14 @@ Please note: The combination of slow control and data aquisition has several dra
 # Output
 Example:
 ```
-128,128,128,128,0,0
-128,128,128,128,0,0
-128,128,128,128,1,1
-128,128,128,128,0,1
-128,128,128,128,0,1
-128,128,128,128,2,3
-128,128,128,128,0,3
+# SiPMTrigger v4 Control v0.4
+# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts
+128 128 128 128 3.20 3.20 0
+128 128 128 128 3.20 3.20 0
+128 128 128 128 3.20 3.20 0
+128 128 128 128 3.20 3.20 0
+128 128 128 128 3.20 3.20 0
+128 128 128 128 3.20 3.20 0
 ```
 
 The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate of the signal on pin 2 of the arduino in the last integration time interval and the sum of all trigger events.
