@@ -2,6 +2,8 @@
 
 ## Unreleased
 - Added commands `SET PE GAIN $CH, $VAL` and `SET PE THR $CH, $PETHR`.
+- Use space as delimiter in the serial output.
+- Added the current threshold setting in photoelectrons to the serial output.
 
 ## 0.4
 - Use FreqCount instead of self-written function based on delay to measure the frequency.
