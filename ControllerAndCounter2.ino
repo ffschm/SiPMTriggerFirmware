@@ -1,4 +1,5 @@
 #include <FreqCount.h>
+#include "mapping.h"
 
 volatile unsigned long irq_count;
 unsigned long counts_sum = 0;
