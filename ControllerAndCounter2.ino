@@ -140,13 +140,14 @@ void print_temperature() {
 void lcd_print_interrupts() {
     lcd.setCursor(0, 1);
     lcd.print("CH1 ");
-    lcd.print(threshold[0]);
+    lcd.print(threshold[threshold_channel[0]]);
     lcd.print("  CH2 ");
-    lcd.print(threshold[0]);
+    lcd.print(threshold[threshold_channel[1]]);
 
     lcd.setCursor(0, 2);
     lcd.print("Rate ");
     lcd.print(counts*(1000/integration_time));
+    lcd.print(" Hz");
 
     lcd.setCursor(0, 3);
     lcd.print("T ");
