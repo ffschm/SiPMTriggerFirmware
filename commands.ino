@@ -62,7 +62,9 @@ double parse_double(const double min=-DBL_MAX,  // std::numeric_limits<T>::min()
 
 void command_set_time() {
   const long time = parse_integer<long>();
+
   if (time != NULL) {
+    serial_interval = time;
     integration_time = time;
     FreqCount.end();
     FreqCount.begin(integration_time);
