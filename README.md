@@ -28,8 +28,8 @@ Example:
 128 128 128 128 3.20 3.20 0
 ```
 
-The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate of the signal on pin 2 of the arduino in the last integration time interval and the sum of all trigger events.
-Channel 2 and 3 of the digital potentiometer correspond to the threshold setting of signal channel 1 and to 2 on the SiPMTrigger board (to be confirmed!).
+The output contains the threshold settings for channel 1-4 of the digital potentiometer as well as the trigger rate with error of the signal on pin 2 of the arduino in the last integration time interval.
+Channel 2 and 3 of the digital potentiometer correspond to the threshold setting of signal channel 1 and to 2 on the SiPMTrigger board.
 
 | Potentiometer channel | Function |
 | --------------------- | -------- |
