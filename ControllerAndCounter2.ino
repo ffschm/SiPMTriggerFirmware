@@ -1,6 +1,7 @@
 #include <FreqCount.h>
 #include "mapping.h"
 #include "RTClib.h"
+#include <LiquidCrystal.h>
 #include <DallasTemperature.h>
 
 
@@ -8,12 +9,14 @@ volatile unsigned long irq_count;
 unsigned long counts = 0;
 float temperature = DEVICE_DISCONNECTED_C;
 unsigned long last_temp_request = 0;
+unsigned long last_lcd_update = 0;
 unsigned long last_serial_update = 0;
 
 // const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
 unsigned long temp_interval = 10000;
+unsigned long lcd_interval = 1000;
 unsigned long serial_interval = 1000;
 
 const size_t channels = 4;
@@ -36,6 +39,8 @@ void setup_potentiometer();
 uint16_t sendCommand(byte control, byte address, byte data);
 
 RTC_DS1307 rtc;
+LiquidCrystal lcd(30, 32, 34, 36, 38, 40);
+LiquidCrystal lcd1(31, 33, 35, 37, 39 , 41);
 
 #define SW_VERSION "0.6"
 
@@ -48,6 +53,7 @@ void setup() {
   setup_potentiometer();
   setup_commands();
   setup_rtc();
+  setup_lcd();
   setup_thermometer();
   update_temperature();
 }
@@ -66,6 +72,11 @@ void loop() {
     last_temp_request = current_millis;
     update_temperature();
     print_temperature();
+  }
+
+  if (current_millis - last_lcd_update >= lcd_interval) {
+    last_lcd_update = current_millis;
+    update_lcd();
   }
 
   if (current_millis - last_serial_update >= serial_interval) {
@@ -124,4 +135,22 @@ void print_temperature() {
   Serial.print(' ');
   Serial.print((char)176);
   Serial.println("C");
+}
+
+void lcd_print_interrupts() {
+    lcd.setCursor(0, 1);
+    lcd.print("CH1 ");
+    lcd.print(threshold[0]);
+    lcd.print("  CH2 ");
+    lcd.print(threshold[0]);
+
+    lcd.setCursor(0, 2);
+    lcd.print("Rate ");
+    lcd.print(counts*(1000/integration_time));
+
+    lcd.setCursor(0, 3);
+    lcd.print("T ");
+    lcd.print(temperature);
+    lcd.print((char)223);
+    lcd.print("C");
 }
