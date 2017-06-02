@@ -2,7 +2,7 @@
 #include "mapping.h"
 
 volatile unsigned long irq_count;
-unsigned long counts_sum = 0;
+unsigned long counts = 0;
 
 // const int input_pin = 47; (set by FreqCount)
 
@@ -42,12 +42,13 @@ void setup() {
 void loop() {
   handle_commands();
   set_thresholds();
-  while (!FreqCount.available()) {
-    delay(1);
-  }
-  const unsigned long count = FreqCount.read();
 
-  print_interrupts(count);
+  if (FreqCount.available()) {
+    counts = FreqCount.read();
+  }
+  }
+
+  print_interrupts();
 }
 
 void set_thresholds() {
@@ -78,9 +79,7 @@ void set_thresholds() {
   }
 }
 
-void print_interrupts(const unsigned long counts) {
-  counts_sum += counts;
-
+void print_interrupts() {
   for (size_t channel = 0; channel < channels; channel++) {
     Serial.print(threshold[channel]);
     Serial.print(" ");
@@ -91,5 +90,5 @@ void print_interrupts(const unsigned long counts) {
     Serial.print(" ");
   }
 
-  Serial.println(counts*(1000/integration_time));
+  Serial.print(counts*(1000/integration_time));
 }
