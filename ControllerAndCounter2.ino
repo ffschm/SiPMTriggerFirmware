@@ -1,15 +1,19 @@
 #include <FreqCount.h>
 #include "mapping.h"
 #include "RTClib.h"
+#include <DallasTemperature.h>
 
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
+float temperature = DEVICE_DISCONNECTED_C;
+unsigned long last_temp_request = 0;
 unsigned long last_serial_update = 0;
 
 // const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
+unsigned long temp_interval = 10000;
 unsigned long serial_interval = 1000;
 
 const size_t channels = 4;
@@ -44,6 +48,8 @@ void setup() {
   setup_potentiometer();
   setup_commands();
   setup_rtc();
+  setup_thermometer();
+  update_temperature();
 }
 
 void loop() {
@@ -55,6 +61,12 @@ void loop() {
   }
 
   const unsigned long current_millis = millis();
+
+  if (current_millis - last_temp_request >= temp_interval) {
+    last_temp_request = current_millis;
+    update_temperature();
+    print_temperature();
+  }
 
   if (current_millis - last_serial_update >= serial_interval) {
     last_serial_update = current_millis;
@@ -104,4 +116,12 @@ void print_interrupts() {
   Serial.print(counts*(1000/integration_time));
   Serial.print(" ");
   Serial.println(sqrt(counts*(1000/integration_time)));
+}
+
+void print_temperature() {
+  Serial.print("# T ");
+  Serial.print(temperature);
+  Serial.print(' ');
+  Serial.print((char)176);
+  Serial.println("C");
 }
