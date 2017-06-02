@@ -97,4 +97,6 @@ void print_interrupts() {
   }
 
   Serial.print(counts*(1000/integration_time));
+  Serial.print(" ");
+  Serial.println(sqrt(counts*(1000/integration_time)));
 }
