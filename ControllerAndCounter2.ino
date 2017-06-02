@@ -60,7 +60,6 @@ void setup() {
 
 void loop() {
   handle_commands();
-  set_thresholds();
 
   if (FreqCount.available()) {
     counts = FreqCount.read();
@@ -81,6 +80,7 @@ void loop() {
 
   if (current_millis - last_serial_update >= serial_interval) {
     last_serial_update = current_millis;
+    set_thresholds();
     print_interrupts();
   }
 }
