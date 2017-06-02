@@ -67,7 +67,7 @@ void loop() {
 
   const unsigned long current_millis = millis();
 
-  if (current_millis - last_temp_request >= temp_interval) {
+  if (current_millis - last_temp_request >= temp_interval && mode[0] != scanning && mode[1] != scanning) {
     last_temp_request = current_millis;
     update_temperature();
     print_temperature();
