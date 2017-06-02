@@ -1,5 +1,7 @@
 #include <FreqCount.h>
 #include "mapping.h"
+#include "RTClib.h"
+
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
@@ -29,6 +31,8 @@ mode_t mode[channels] = {constant};
 void setup_potentiometer();
 uint16_t sendCommand(byte control, byte address, byte data);
 
+RTC_DS1307 rtc;
+
 #define SW_VERSION "0.6"
 
 void setup() {
@@ -39,6 +43,7 @@ void setup() {
   Serial.println("# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts");
   setup_potentiometer();
   setup_commands();
+  setup_rtc();
 }
 
 void loop() {
