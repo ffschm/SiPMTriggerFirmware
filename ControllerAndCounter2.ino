@@ -3,10 +3,12 @@
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
+unsigned long last_serial_update = 0;
 
 // const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
+unsigned long serial_interval = 1000;
 
 const size_t channels = 4;
 byte threshold[channels] = {128, 128, 128, 128};
@@ -46,9 +48,13 @@ void loop() {
   if (FreqCount.available()) {
     counts = FreqCount.read();
   }
-  }
 
-  print_interrupts();
+  const unsigned long current_millis = millis();
+
+  if (current_millis - last_serial_update >= serial_interval) {
+    last_serial_update = current_millis;
+    print_interrupts();
+  }
 }
 
 void set_thresholds() {
