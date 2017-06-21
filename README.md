@@ -3,6 +3,15 @@ This firmware allows an arduino to be used as a controller of the digital potent
 as well as a simple scaler.
 Please note: The combination of slow control and data aquisition has several drawbacks but can be choosen if handled carefully.
 
+# Installation
+
+This sketch depends on the following libraries:
+- [FreqCount](https://www.pjrc.com/teensy/td_libs_FreqCount.html)
+- [RTClib](http://www.tinkbox.ph/sites/tinkbox.ph/files/downloads/RTClib.zip)
+- [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
+- [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library)
+- [NiceSerialCommand](https://github.com/ffschm/Arduino-NiceSerialCommand)
+
 # Commands
 
 | Comand | Description |
