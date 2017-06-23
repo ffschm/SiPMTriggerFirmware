@@ -7,6 +7,8 @@
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
+bool temperature_requested = false;
+bool display_enabled = false;
 float temperature = DEVICE_DISCONNECTED_C;
 unsigned long last_temp_request = 0;
 unsigned long last_lcd_update = 0;
@@ -67,13 +69,13 @@ void loop() {
 
   const unsigned long current_millis = millis();
 
-  if (current_millis - last_temp_request >= temp_interval && mode[0] != scanning && mode[1] != scanning) {
+  if (temperature_requested && current_millis - last_temp_request >= temp_interval && mode[0] != scanning && mode[1] != scanning) {
     last_temp_request = current_millis;
     update_temperature();
     print_temperature();
   }
 
-  if (current_millis - last_lcd_update >= lcd_interval) {
+  if (display_enabled && current_millis - last_lcd_update >= lcd_interval) {
     last_lcd_update = current_millis;
     update_lcd();
   }
