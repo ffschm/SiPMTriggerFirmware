@@ -6,11 +6,13 @@ Please note: The combination of slow control and data aquisition has several dra
 # Installation
 
 This sketch depends on the following libraries:
-- [FreqCount](https://www.pjrc.com/teensy/td_libs_FreqCount.html)
+- [FreqCount](https://github.com/PaulStoffregen/FreqCount)
 - [RTClib](http://www.tinkbox.ph/sites/tinkbox.ph/files/downloads/RTClib.zip)
-- [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
+- [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal) (included in the Arduino IDE)
+- [OneWire](https://github.com/PaulStoffregen/OneWire)
 - [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library)
-- [NiceSerialCommand](https://github.com/ffschm/Arduino-NiceSerialCommand)
+- [AnotherSerialCommand](https://github.com/ffschm/Arduino-AnotherSerialCommand)
+- [SPI](https://www.arduino.cc/en/Reference/SPI) (included in the Arduino IDE)
 
 # Commands
 
