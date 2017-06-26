@@ -13,6 +13,7 @@ This sketch depends on the following libraries:
 - [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library)
 - [AnotherSerialCommand](https://github.com/ffschm/Arduino-AnotherSerialCommand)
 - [SPI](https://www.arduino.cc/en/Reference/SPI) (included in the Arduino IDE)
+- [SparkFun BME280](https://github.com/sparkfun/SparkFun_BME280_Arduino_Library)
 
 # Commands
 
