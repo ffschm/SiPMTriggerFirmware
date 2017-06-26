@@ -7,7 +7,7 @@
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
-float humidity = 0, temperature = 0, pressure = 0, altitude_pressure = 0;
+float humidity = 0, temperature = 0, pressure = 0;
 bool display_enabled = false;
 
 unsigned long last_lcd_update = 0;

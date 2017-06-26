@@ -34,7 +34,6 @@ void update_temperature() {
   humidity = BME.readFloatHumidity();
   temperature = BME.readTempC();
   pressure = BME.readFloatPressure();
-  altitude_pressure = BME.getAltitudeMetersFromPressure(pressure);
 }
 
 void print_temperature() {
@@ -49,8 +48,4 @@ void print_temperature() {
   Serial.print("# pressure = ");
   Serial.print(pressure / 100.0);
   Serial.println(" hPa");
-
-  Serial.print("# approx. alt = ");
-  Serial.print(altitude_pressure);
-  Serial.println(" m");
 }
