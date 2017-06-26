@@ -51,7 +51,7 @@ void setup() {
   FreqCount.begin(integration_time);
   Serial.print("# SiPMTrigger v4 Control v");
   Serial.println(SW_VERSION);
-  Serial.println("# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts");
+  Serial.println("# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts sqrt(counts)");
   setup_potentiometer();
   setup_commands();
   setup_rtc();
@@ -125,10 +125,10 @@ void print_interrupts() {
     Serial.print(1.0*threshold[threshold_channel[channel]]/gain[channel]);
     Serial.print(" ");
   }
-
-  Serial.print(counts*(1000/integration_time));
+  const double freq = counts * (1000/(double) integration_time);
+  Serial.print(freq);
   Serial.print(" ");
-  Serial.println(sqrt(counts*(1000/integration_time)));
+  Serial.println(sqrt(freq));
 }
 
 void print_temperature() {
