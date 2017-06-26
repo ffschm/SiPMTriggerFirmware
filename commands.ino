@@ -13,6 +13,7 @@ void setup_commands() {
   sCmd.addCommand("SET PE GAIN", command_set_pe_gain);
   sCmd.addCommand("SET PE THR", command_set_pe_thr);
   sCmd.addCommand("SCAN PE THR", command_scan_pe_thr);
+  sCmd.addCommand("GET TEMP", command_get_temperature);
   sCmd.setDefaultHandler(command_unrecognized);
 }
 
@@ -118,6 +119,12 @@ void command_scan_pe_thr() {
 
   mode[CH1_THR] = pe_scanning;
   mode[CH2_THR] = pe_scanning;
+}
+
+void command_get_temperature() {
+  Serial.print("OO");
+  update_temperature();
+  print_temperature();
 }
 
 void command_unrecognized(const char *c) {

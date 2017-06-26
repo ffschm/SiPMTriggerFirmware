@@ -7,17 +7,15 @@
 
 volatile unsigned long irq_count;
 unsigned long counts = 0;
-bool temperature_requested = false;
+float humidity = 0, temperature = 0, pressure = 0, altitude_pressure = 0;
 bool display_enabled = false;
-float temperature = DEVICE_DISCONNECTED_C;
-unsigned long last_temp_request = 0;
+
 unsigned long last_lcd_update = 0;
 unsigned long last_serial_update = 0;
 
 // const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
-unsigned long temp_interval = 10000;
 unsigned long lcd_interval = 1000;
 unsigned long serial_interval = 1000;
 
@@ -69,11 +67,6 @@ void loop() {
 
   const unsigned long current_millis = millis();
 
-  if (temperature_requested && current_millis - last_temp_request >= temp_interval && mode[0] != scanning && mode[1] != scanning) {
-    last_temp_request = current_millis;
-    update_temperature();
-    print_temperature();
-  }
 
   if (display_enabled && current_millis - last_lcd_update >= lcd_interval) {
     last_lcd_update = current_millis;
@@ -129,14 +122,6 @@ void print_interrupts() {
   Serial.print(freq);
   Serial.print(" ");
   Serial.println(sqrt(freq));
-}
-
-void print_temperature() {
-  Serial.print("# T ");
-  Serial.print(temperature);
-  Serial.print(' ');
-  Serial.print((char)176);
-  Serial.println("C");
 }
 
 void lcd_print_interrupts() {

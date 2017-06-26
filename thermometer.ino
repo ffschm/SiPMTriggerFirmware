@@ -1,33 +1,56 @@
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "SparkFunBME280.h"
 
-// Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 42
+BME280 BME;
 
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass our oneWire reference to Dallas Temperature. 
-DallasTemperature sensors(&oneWire);
-
-// arrays to hold device address
-DeviceAddress insideThermometer;
-
-const int temp_resolution = 12;
 
 
 void setup_thermometer() {
-    sensors.begin();
-    if(sensors.getDeviceCount() != 1) {
-        Serial.println("# No temperature sensor found.");
-    }
+  //commInterface can be I2C_MODE or SPI_MODE
+  BME.settings.commInterface = I2C_MODE;
+  BME.settings.I2CAddress = 0x76; //77 for Bosch, 76 for Bosch-Fake
+  BME.settings.runMode = 3; //  3, Normal mode
+  BME.settings.tStandby = 0; //  0, 0.5ms
+  BME.settings.filter = 0; //  0, filter off
 
-    DeviceAddress tempDeviceAddress;
-    sensors.getAddress(tempDeviceAddress, 0);
-    sensors.setResolution(tempDeviceAddress, temp_resolution);
+  //tempOverSample can be:
+  //  0, skipped
+  //  1 through 5, oversampling *1, *2, *4, *8, *16 respectively
+  BME.settings.tempOverSample = 1;
+
+  //pressOverSample can be:
+  //  0, skipped
+  //  1 through 5, oversampling *1, *2, *4, *8, *16 respectively
+  BME.settings.pressOverSample = 1;
+
+  //humidOverSample can be:
+  //  0, skipped
+  //  1 through 5, oversampling *1, *2, *4, *8, *16 respectively
+  BME.settings.humidOverSample = 1;
+
+  BME.begin();
 }
 
 void update_temperature() {
-    sensors.requestTemperatures();
-    temperature = sensors.getTempCByIndex(0);
+  humidity = BME.readFloatHumidity();
+  temperature = BME.readTempC();
+  pressure = BME.readFloatPressure();
+  altitude_pressure = BME.getAltitudeMetersFromPressure(pressure);
+}
+
+void print_temperature() {
+  Serial.print("# T = ");
+  Serial.print(temperature);
+  Serial.println(" degC");
+
+  Serial.print("# hum = ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  Serial.print("# pressure = ");
+  Serial.print(pressure / 100.0);
+  Serial.println(" hPa");
+
+  Serial.print("# approx. alt = ");
+  Serial.print(altitude_pressure);
+  Serial.println(" m");
 }

@@ -25,6 +25,7 @@ This sketch depends on the following libraries:
 | `SET PE THR $CH, $PETHR`| Set the threshold of signal channel `$CH` to `$PETHR * $GAIN`. |
 | `SCAN THR $STEPWIDTH`| Scan the thresholds of both signal channels simultaneously by increasing them by `$STEPWIDTH` at each tick. |
 | `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
+| `GET TEMP`| Measure the temperature (&humidity&pressure) and print it via the serial console. |
 
 # Output
 Example:
