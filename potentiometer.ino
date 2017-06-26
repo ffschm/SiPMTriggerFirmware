@@ -12,6 +12,7 @@ uint16_t sendCommand(byte control, byte address, byte data) {
   uint16_t result = SPI.transfer16(dataToSend);
   digitalWrite(slaveSelectPin, HIGH);
   SPI.endTransaction();
+  delayMicroseconds(40);
 
   return result;
 }
