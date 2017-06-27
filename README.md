@@ -15,6 +15,17 @@ This sketch depends on the following libraries:
 - [SPI](https://www.arduino.cc/en/Reference/SPI) (included in the Arduino IDE)
 - [SparkFun BME280](https://github.com/sparkfun/SparkFun_BME280_Arduino_Library)
 
+## Pin configuration
+
+In the follwing table the arduino pins used by this sketch are listed.
+
+| Arduino pin | Pin Mode | Function |
+| ----------- | ---------| -------- |
+| 47 | input | Frequency counter input |
+| 53 | output | Chip Select to SiPM Trigger board (potentiometer IC) |
+| MISO, MOSI, SCK, +5V, GND (ICSP header) | both | SPI to SiPM Trigger board |
+| SDA, SCL, +3.3V, GND | both | I2C to BME280 environmental sensor |
+
 # Commands
 
 | Comand | Description |
