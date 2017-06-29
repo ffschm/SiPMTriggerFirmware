@@ -1,3 +1,4 @@
+#include "AD5144.h"
 #include <FreqCount.h>
 #include "mapping.h"
 #include "RTClib.h"
@@ -8,12 +9,11 @@
 volatile unsigned long irq_count;
 unsigned long counts = 0;
 float humidity = 0, temperature = 0, pressure = 0;
+
 bool display_enabled = false;
 
 unsigned long last_lcd_update = 0;
 unsigned long last_serial_update = 0;
-
-// const int input_pin = 47; (set by FreqCount)
 
 unsigned long integration_time = 1000;
 unsigned long lcd_interval = 1000;
@@ -35,9 +35,10 @@ typedef enum {
 mode_t mode[channels] = {constant};
 
 //#include <commands.ino>
-void setup_potentiometer();
-uint16_t sendCommand(byte control, byte address, byte data);
 
+
+// Declare driver variables for external devices
+AD5144 poti(channels, 53);
 RTC_DS1307 rtc;
 LiquidCrystal lcd(30, 32, 34, 36, 38, 40);
 LiquidCrystal lcd1(31, 33, 35, 37, 39 , 41);
@@ -50,7 +51,7 @@ void setup() {
   Serial.print("# SiPMTrigger v4 Control v");
   Serial.println(SW_VERSION);
   Serial.println("# CH1(p_width) CH1(THR) CH2(THR) CH1(p_width) CH1(THR/pe) CH2(THR/pe) counts sqrt(counts)");
-  setup_potentiometer();
+  poti.begin();
   setup_commands();
   setup_rtc();
   setup_lcd();
@@ -84,12 +85,10 @@ void set_thresholds() {
   for (size_t channel = 0; channel < channels; channel++) {
     if (mode[channel] == scanning) {
       threshold[channel]++;
-      // Write contents of serial register data to RDAC
-      sendCommand(1, channel, threshold[channel]);
+      poti.set_value(channel, threshold[channel]);
     }
     else if (mode[channel] == updated) {
-      // Write contents of serial register data to RDAC
-      sendCommand(1, channel, threshold[channel]);
+      poti.set_value(channel, threshold[channel]);
       mode[channel] = constant;
     }
     else if (mode[channel] == pe_scanning) {
@@ -97,8 +96,7 @@ void set_thresholds() {
 
       if (0 <= thr && thr <= 255) {
         threshold[channel] += thr;
-        // Write contents of serial register data to RDAC
-        sendCommand(1, channel, threshold[channel]);
+        poti.set_value(channel, threshold[channel]);
       } else {
         for (size_t i = 0; i < signal_channels; i++) {
           mode[i] = constant;

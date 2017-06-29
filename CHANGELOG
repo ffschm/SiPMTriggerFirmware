@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased
+- Extracted AD5144 driver into a seperate library.
 
 ## 0.6
 - Changed event loop to use millis() instead of delay(). Commands are handled faster now.

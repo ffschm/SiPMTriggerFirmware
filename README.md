@@ -14,6 +14,7 @@ This sketch depends on the following libraries:
 - [AnotherSerialCommand](https://github.com/ffschm/Arduino-AnotherSerialCommand)
 - [SPI](https://www.arduino.cc/en/Reference/SPI) (included in the Arduino IDE)
 - [SparkFun BME280](https://github.com/sparkfun/SparkFun_BME280_Arduino_Library)
+- [AD5144](https://github.com/ffschm/Arduino-AD5144-library)
 
 ## Pin configuration
 
