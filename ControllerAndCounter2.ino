@@ -24,11 +24,16 @@ struct global_settings {
   unsigned long integration_time;
   unsigned long lcd_interval;
   unsigned long serial_interval;
+  bool dynamic_integration_time;
 
   bool display_enabled;
 };
 
-global_settings settings = {1000, 1000, 1000, false};
+global_settings settings = {.integration_time = 1000,
+                            .lcd_interval = 1000,
+                            .serial_interval = 1000,
+                            .dynamic_integration_time = true,
+                            .display_enabled = false};
 
 
 // Declare variables for measured data
@@ -47,7 +52,7 @@ byte threshold[signal_channels] = {128, 128};
  * from the number of photoelectrons
  */
 double offset[signal_channels] = {0, 0};
-double gain[signal_channels] = {40, 40};
+double gain[signal_channels] = {1, 1};
 
 
 /* Define the global mode of the micrcontroller.
@@ -143,14 +148,18 @@ double parse_double(const double min=-DBL_MAX,
  * #Command handlers #
  * ################### */
 
+void set_integration_time(const unsigned long time) {
+    settings.integration_time = time;
+    FreqCount.end();
+    FreqCount.begin(settings.integration_time);
+}
+
 void command_set_time() {
   const long time = parse_integer<long>();
 
   if (time != NULL) {
     settings.serial_interval = time;
-    settings.integration_time = time;
-    FreqCount.end();
-    FreqCount.begin(settings.integration_time);
+    set_integration_time(time);
   }
 }
 
@@ -161,17 +170,19 @@ void command_set_thr() {
   set_threshold(channel - 1, value);
 }
 
-void command_scan_thr() {
+void command_scan_pe_thr() {
   const int result1 = set_pe_threshold(0, 0);
   const int result2 = set_pe_threshold(1, 0);
 
-  if (!result1 || !result2) {
-    Serial.println("Error: Can't start threshold can, 0p.e. is already out of bounds.");
-    Serial.println("Check gain and offset and try again.");
+
+  if (result1 != 0 || result2 != 0) {
+    Serial.println("# Error: Can't start threshold scan, 0p.e. is already out of bounds.");
+    Serial.println("# Check gain and offset and try again.");
   }
 
   spectrum_i = 0;
   mode = scanning;
+  Serial.println("# Threshold scan started. Please wait...");
 }
 
 void command_set_gain() {
@@ -193,8 +204,8 @@ void command_set_pe_thr() {
   const double value = parse_double();
 
   const int success = set_pe_threshold(channel - 1, value);
-  if (!success) {
-    Serial.println("Error: Requested treshold is out of range, check gain and offset and try again.");
+  if (success != 0) {
+    Serial.println("# Error: Requested treshold is out of range, check gain and offset and try again.");
   }
 }
 
@@ -217,7 +228,7 @@ void setup_commands() {
 
   sCmd.addCommand("SET THR", command_set_thr);
   sCmd.addCommand("SET PE THR", command_set_pe_thr);
-  sCmd.addCommand("SCAN THR", command_scan_thr);
+  sCmd.addCommand("SCAN PE THR", command_scan_pe_thr);
 
   sCmd.addCommand("GET TEMP", command_get_temperature);
   sCmd.setDefaultHandler(command_unrecognized);
@@ -237,6 +248,14 @@ void set_threshold(const size_t channel, const byte value) {
   }
 
   threshold[channel] = value;
+
+  // Wait 35us until the switching noise is gone
+  delayMicroseconds(35);
+
+  // Start a new frequency measurement
+  // (prevents threshold changes to take place during a single measurement)
+  FreqCount.end();
+  FreqCount.begin(settings.integration_time);
 }
 
 
@@ -258,6 +277,11 @@ int set_pe_threshold(const size_t channel, const double photoelectrons) {
   return 0;
 }
 
+// Return the treshold of the given channel in photoelectrons, based on gain and offset.
+double effective_thr(const size_t channel) {
+  return ((double) threshold[channel] - offset[channel]) / gain[channel];
+}
+
 
 /* ###########################
  * # Serial output functions #
@@ -265,11 +289,52 @@ int set_pe_threshold(const size_t channel, const double photoelectrons) {
 
 /* Print measurements while idling */
 void print_interrupts() {
-  // TODO: Not implemented.
+  Serial.print(threshold[0]);
+  Serial.print(" ");
+  Serial.print(threshold[1]);
+  Serial.print("  ");
+
+  Serial.print(effective_thr(0));
+  Serial.print(" ");
+  Serial.print(effective_thr(1));
+  Serial.print("  ");
+
+  const double freq = counts * (1000 / (double) settings.integration_time);
+  Serial.print(freq);
+  Serial.print(" ");
+  Serial.println(sqrt(freq));
 }
 
 void print_spectrum() {
-  // TODO: Not implemented.
+  Serial.println("## THR = OFFSET + GAIN * (No. of photolelectrons)");
+  Serial.println("## Gain_CH1 Gain_CH2 Offset_CH1 Offset_CH2");
+  Serial.print("## ");
+  Serial.print(gain[0]);
+  Serial.print(" ");
+  Serial.print(gain[1]);
+  Serial.print(" ");
+  Serial.print(offset[0]);
+  Serial.print(" ");
+  Serial.println(offset[1]);
+
+  const double scan_width = 1 / (double) min(gain[0], gain[1]);
+
+  for (size_t i = 0; i <= spectrum_i; i++) {
+    Serial.print(offset[0] + scan_width * gain[0] * i);
+    Serial.print(" ");
+    Serial.print(offset[1] + scan_width * gain[1] * i);
+    Serial.print(" ");
+    Serial.print(" ");
+    Serial.print(i * scan_width);
+    Serial.print(" ");
+    Serial.print(i * scan_width);
+    Serial.print(" ");
+    Serial.print(" ");
+
+    Serial.print(spectrum[i]);
+    Serial.print(" ");
+    Serial.println(spectrum_error[i]);
+  }
 }
 
 
@@ -314,7 +379,7 @@ void setup() {
   update_temperature();
 
   FreqCount.begin(settings.integration_time);
-  Serial.println("# CH1(THR) CH2(THR) Counts sqrt(Counts)");
+  Serial.println("# CH1(THR) CH2(THR)  CH1(THR/pe) CH2(THR/pe)  counts sqrt(counts)");
 }
 
 
@@ -323,9 +388,9 @@ void setup() {
  * ################# */
 
 void loop() {
-  handle_commands();
-
   if(mode == idling) {
+    handle_commands();
+
     if (FreqCount.available()) {
       counts = FreqCount.read();
     }
@@ -342,23 +407,53 @@ void loop() {
       print_interrupts();
     }
   } else if (mode == scanning) {
-    // TODO: Not implemented.
-    if (FreqCount.available()) {
-      counts = FreqCount.read();
-    }
-    spectrum[spectrum_i] = counts;
-
-    spectrum_i += 1;
-    const double global_pe = spectrum_i * 1.0 / min(gain[0], gain[1]);
-    const int result1 = set_pe_threshold(0, global_pe);
-    const int result2 = set_pe_threshold(1, global_pe);
-    if (!result1 || !result2) {
-      spectrum_i -= 1;
-      // At least one channel is out of bounds, spectrum scan finished.
-      Serial.println("# Spectrum scan finished.");
+    size_t bytes = Serial.available();
+    if (bytes > 0) {
+      while (bytes > 0) {
+        Serial.read();
+        bytes--;
+      }
+      Serial.println("# Threshold scan aborted.");
       print_spectrum();
 
       mode = idling;
+      return;
+    }
+
+    if (FreqCount.available()) {
+      /* Store the latest frequency measurement and start a new measurement with updated threshold */
+      counts = FreqCount.read();
+
+      const double freq = counts * (1000 / (double) settings.integration_time);
+      spectrum[spectrum_i] = freq;
+      spectrum_error[spectrum_i] = sqrt(freq);
+
+      spectrum_i += 1;
+      const double global_pe = spectrum_i * 1.0 / min(gain[0], gain[1]);
+      const int result1 = set_pe_threshold(0, global_pe);
+      const int result2 = set_pe_threshold(1, global_pe);
+      if (result1 != 0 || result2 != 0) {
+        spectrum_i -= 1;
+        // At least one channel is out of bounds, spectrum scan finished.
+        Serial.println("# Threshold scan finished.");
+        print_spectrum();
+
+        mode = idling;
+      }
+
+      if (settings.dynamic_integration_time) {
+        /* Adjust the integration time based on the last measured frequency */
+        if (counts == 0) {
+            set_integration_time(settings.integration_time + 1000);
+            Serial.print("# new integration time = ");
+            Serial.println(settings.integration_time);
+        } else {
+            const unsigned long new_time = 100 * (settings.integration_time * sqrt(counts)) / counts;
+            set_integration_time(max(10, new_time));
+            Serial.print("# new integration time = ");
+            Serial.println(settings.integration_time);
+        }
+      }
     }
   }
 }

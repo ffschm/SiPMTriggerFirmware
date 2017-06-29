@@ -2,6 +2,13 @@
 
 ## Unreleased
 - Extracted AD5144 driver into a seperate library.
+- Moved code into a single sketch.
+- Renamed command `SET PE GAIN` to `SET GAIN`.
+- Added command `SET OFFSET`.
+- Removed command `SCAN THR`.
+- Changed `SCAN THR` to scan both channels from 0 p.e. up to the highest possible threshold simultaneously.
+- Changed threshold to wait for the end of the scan to print the measured data on the serial port.
+- Added dynamic adjustment of integration time based on last frequency measurement.
 
 ## 0.6
 - Changed event loop to use millis() instead of delay(). Commands are handled faster now.
