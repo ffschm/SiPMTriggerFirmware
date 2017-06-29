@@ -1,6 +1,12 @@
 # Change Log
 
 ## Unreleased
+- Changed event loop to use millis() instead of delay(). Commands are handled faster now.
+- Added RTC support.
+- Added LCD support (disabled).
+- Added temperature measurement via BME280 (disabled).
+- Added 40us delay after change of potentiometer value to wait for the switching noise to decay.
+- Added command `GET TEMP`.
 
 ## 0.5
 - Added commands `SET PE GAIN $CH, $VAL` and `SET PE THR $CH, $PETHR`.
