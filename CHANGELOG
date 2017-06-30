@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased
+
+## 0.7
 - Extracted AD5144 driver into a seperate library.
 - Moved code into a single sketch (except lcd, rtc & bme280-related code).
 - Renamed command `SET PE GAIN` to `SET GAIN`.

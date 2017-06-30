@@ -101,7 +101,7 @@ RTC_DS1307 rtc;
 LiquidCrystal lcd(30, 32, 34, 36, 38, 40);
 LiquidCrystal lcd1(31, 33, 35, 37, 39 , 41);
 
-#define SW_VERSION "0.7pre"
+#define SW_VERSION "0.7"
 
 
 /* ###################
