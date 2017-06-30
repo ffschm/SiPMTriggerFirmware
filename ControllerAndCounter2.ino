@@ -265,6 +265,10 @@ void command_set_gain() {
   const byte channel = parse_integer<byte>(1, signal_channels);
   const double value = parse_double();
 
+  if (value == 0) {
+    Serial.println("# Command failed: Can't set gain to zero.");
+    return;
+  }
   gain[channel - 1] = value;
 }
 
