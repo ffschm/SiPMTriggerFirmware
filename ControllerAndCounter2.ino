@@ -23,7 +23,6 @@ enum pot_channel {
 struct global_settings {
   unsigned long integration_time;
   unsigned long lcd_interval;
-  unsigned long serial_interval;
   bool dynamic_integration_time;
 
   bool display_enabled;
@@ -31,7 +30,6 @@ struct global_settings {
 
 global_settings settings = {.integration_time = 1000,
                             .lcd_interval = 1000,
-                            .serial_interval = 1000,
                             .dynamic_integration_time = true,
                             .display_enabled = false};
 
@@ -61,26 +59,41 @@ double gain[signal_channels] = {1, 1};
  */
 typedef enum {
   idling,
+  scanning_single,
   scanning,
 } mode_t;
 
 mode_t mode = idling;
 
+// Defines which channel get scanned during a single channel scan.
+size_t scanning_channel = 0;
 
 /* Define variables required for scanning the discrimintor threshold.
  *
  * During a scan the array `spectrum` and `spectrum_error` gets filled
- * with data, starting with a threshold of 0 photoelectrons.
+ * with data, starting with a threshold of `min` photoelectrons.
  * In each step, the variable `spectrum_i` is incremented by one and
- * the threshold is increased by 1/`gain` photoelectrons, until the
- * highest possible threshold is reached. In that case the measured
- * spectrum gets printed on the serial console and the global mode is
- * set to `idling` again.
+ * the threshold is increased by `step` photoelectrons, until the
+ * highest possible threshold or `max` photolectrons is reached. In that
+ * case the measured spectrum gets printed on the serial console and the
+ * global mode is set to `idling` again.
  */
+struct spectrum {
+  size_t i;
+  double freq[256];
+  double freq_err[256];
+  double step;
+  double min;
+  double max;
+};
 
-size_t spectrum_i = 0;
-double spectrum[256];
-double spectrum_error[256];
+spectrum spectrum0 = {.i = 0,
+                      .freq = {0},
+                      .freq_err = {0},
+                      .step = 0.1,
+                      .min = 0,
+                      .max = -1};
+
 
 // Declare driver variables for external devices
 AD5144 poti(channels, 53);
@@ -144,6 +157,20 @@ double parse_double(const double min=-DBL_MAX,
   }
 }
 
+/* Returns true if at least one byte is received on the serial input, false otherwise */
+bool serial_byte_received() {
+  size_t bytes = Serial.available();
+  if (bytes > 0) {
+    /* Abort the threshold scan when receiving any byte on the serial port. */
+    while (bytes > 0) {
+      Serial.read();
+      bytes--;
+    }
+    return true;
+  }
+  return false;
+}
+
 /* ###################
  * #Command handlers #
  * ################### */
@@ -154,11 +181,27 @@ void set_integration_time(const unsigned long time) {
     FreqCount.begin(settings.integration_time);
 }
 
+void adjust_integration_time() {
+  /* Adjust the integration time based on the last measured frequency */
+  if (counts == 0) {
+      set_integration_time(settings.integration_time + 1000);
+      Serial.print("# new integration time = ");
+      Serial.println(settings.integration_time);
+  } else {
+      unsigned long new_time = 100 * (settings.integration_time * sqrt(counts)) / counts;
+      if (new_time>5000) {
+        new_time = 5000;
+      }
+      set_integration_time(max(100, new_time));
+      Serial.print("# new integration time = ");
+      Serial.println(settings.integration_time);
+  }
+}
+
 void command_set_time() {
   const long time = parse_integer<long>();
 
   if (time != NULL) {
-    settings.serial_interval = time;
     set_integration_time(time);
   }
 }
@@ -168,6 +211,34 @@ void command_set_thr() {
   const byte value = parse_integer<byte>(0, 255);
 
   set_threshold(channel - 1, value);
+}
+
+void command_scan_thr() {
+  const byte channel = parse_integer<byte>(1, signal_channels) - 1;
+  const double value = parse_double();
+
+  const int result = set_pe_threshold(channel, 0);
+  if (result != 0) {
+    Serial.println("# Error: Can't start threshold scan, 0p.e. is already out of bounds.");
+    Serial.println("# Check gain and offset and try again.");
+  }
+
+  // spectrum_step = 1.0 / min(gain[0], gain[1]);
+  spectrum0.step = 1;
+  spectrum0.min = 0;
+  spectrum0.max = DBL_MAX;
+  spectrum0.i = 0;
+  scanning_channel = channel;
+  mode = scanning_single;
+
+  // Disable the other channel during the scan to prevent cross-talk
+  if (scanning_channel == 1) {
+    set_threshold(0, 255);
+  } else {
+    set_threshold(1, 255);
+  }
+
+  Serial.println("# Threshold scan for a single channel started. Please wait...");
 }
 
 void command_scan_pe_thr() {
@@ -180,7 +251,12 @@ void command_scan_pe_thr() {
     Serial.println("# Check gain and offset and try again.");
   }
 
-  spectrum_i = 0;
+  // Start scan from 0 p.e. up to the highest possible threshold in fixed steps
+  // spectrum0.step = 1.0 / min(gain[0], gain[1]);
+  spectrum0.step = 0.1;
+  spectrum0.min = 0;
+  spectrum0.max = DBL_MAX;
+  spectrum0.i = 0;
   mode = scanning;
   Serial.println("# Threshold scan started. Please wait...");
 }
@@ -210,7 +286,6 @@ void command_set_pe_thr() {
 }
 
 void command_get_temperature() {
-  Serial.print("OO");
   update_temperature();
   print_temperature();
 }
@@ -227,6 +302,7 @@ void setup_commands() {
   sCmd.addCommand("SET OFFSET", command_set_offset);
 
   sCmd.addCommand("SET THR", command_set_thr);
+  sCmd.addCommand("SCAN THR", command_scan_thr);
   sCmd.addCommand("SET PE THR", command_set_pe_thr);
   sCmd.addCommand("SCAN PE THR", command_scan_pe_thr);
 
@@ -317,23 +393,12 @@ void print_spectrum() {
   Serial.print(" ");
   Serial.println(offset[1]);
 
-  const double scan_width = 1 / (double) min(gain[0], gain[1]);
-
-  for (size_t i = 0; i <= spectrum_i; i++) {
-    Serial.print(offset[0] + scan_width * gain[0] * i);
+  for (size_t i = 0; i <= spectrum0.i; i++) {
+    Serial.print(spectrum0.min + spectrum0.step * i);
     Serial.print(" ");
-    Serial.print(offset[1] + scan_width * gain[1] * i);
+    Serial.print(spectrum0.freq[i]);
     Serial.print(" ");
-    Serial.print(" ");
-    Serial.print(i * scan_width);
-    Serial.print(" ");
-    Serial.print(i * scan_width);
-    Serial.print(" ");
-    Serial.print(" ");
-
-    Serial.print(spectrum[i]);
-    Serial.print(" ");
-    Serial.println(spectrum_error[i]);
+    Serial.println(spectrum0.freq_err[i]);
   }
 }
 
@@ -387,73 +452,105 @@ void setup() {
  * # Loop function #
  * ################# */
 
-void loop() {
-  if(mode == idling) {
-    handle_commands();
+void loop_idling() {
+  handle_commands();
 
-    if (FreqCount.available()) {
-      counts = FreqCount.read();
-    }
+  if (FreqCount.available()) {
+    counts = FreqCount.read();
+  }
 
-    const unsigned long current_millis = millis();
+  const unsigned long current_millis = millis();
 
-    if (settings.display_enabled && current_millis - last_lcd_update >= settings.lcd_interval) {
-      last_lcd_update = current_millis;
-      update_lcd();
-    }
+  if (settings.display_enabled && current_millis - last_lcd_update >= settings.lcd_interval) {
+    last_lcd_update = current_millis;
+    update_lcd();
+  }
 
-    if (current_millis - last_serial_update >= settings.serial_interval) {
-      last_serial_update = current_millis;
-      print_interrupts();
-    }
-  } else if (mode == scanning) {
-    size_t bytes = Serial.available();
-    if (bytes > 0) {
-      while (bytes > 0) {
-        Serial.read();
-        bytes--;
-      }
-      Serial.println("# Threshold scan aborted.");
+  if (current_millis - last_serial_update >= settings.integration_time) {
+    last_serial_update = current_millis;
+    print_interrupts();
+  }
+}
+
+void loop_scanning_single() {
+  if(serial_byte_received()) {
+    /* Abort scan if any byte received via serial input. */
+    Serial.println("# Threshold scan aborted.");
+    print_spectrum();
+
+    mode = idling;
+    return;
+  }
+  if (FreqCount.available()) {
+    /* Store the latest frequency measurement and start a new measurement with updated threshold */
+    counts = FreqCount.read();
+
+    const double freq = counts * (1000 / (double) settings.integration_time);
+    spectrum0.freq[spectrum0.i] = freq;
+    spectrum0.freq_err[spectrum0.i] = sqrt(freq);
+
+    print_interrupts();
+
+    spectrum0.i += 1;
+    const double global_pe = spectrum0.min + spectrum0.i * spectrum0.step;
+    const int result = set_pe_threshold(scanning_channel, global_pe);
+    if (global_pe > spectrum0.max || result != 0) {
+      spectrum0.i -= 1;
+      // The next threshold is out of bounds, spectrum scan finished.
+      Serial.println("# Threshold scan finished.");
       print_spectrum();
 
       mode = idling;
-      return;
+    }
+  }
+}
+
+void loop_scanning() {
+  if(serial_byte_received()) {
+    /* Abort scan if any byte received via serial input. */
+    Serial.println("# Threshold scan aborted.");
+    print_spectrum();
+
+    mode = idling;
+    return;
+  }
+
+  if (FreqCount.available()) {
+    /* Store the latest frequency measurement and start a new measurement with updated threshold */
+    counts = FreqCount.read();
+
+    const double freq = counts * (1000 / (double) settings.integration_time);
+    spectrum0.freq[spectrum0.i] = freq;
+    spectrum0.freq_err[spectrum0.i] = sqrt(freq);
+
+    print_interrupts();
+
+    spectrum0.i += 1;
+    const double global_pe = spectrum0.min + spectrum0.i * spectrum0.step;
+    const int result1 = set_pe_threshold(0, global_pe);
+    const int result2 = set_pe_threshold(1, global_pe);
+
+    if (global_pe > spectrum0.max || result1 != 0 || result2 != 0) {
+      spectrum0.i -= 1;
+      // At least one channel is out of bounds, spectrum scan finished.
+      Serial.println("# Threshold scan finished.");
+      print_spectrum();
+
+      mode = idling;
     }
 
-    if (FreqCount.available()) {
-      /* Store the latest frequency measurement and start a new measurement with updated threshold */
-      counts = FreqCount.read();
-
-      const double freq = counts * (1000 / (double) settings.integration_time);
-      spectrum[spectrum_i] = freq;
-      spectrum_error[spectrum_i] = sqrt(freq);
-
-      spectrum_i += 1;
-      const double global_pe = spectrum_i * 1.0 / min(gain[0], gain[1]);
-      const int result1 = set_pe_threshold(0, global_pe);
-      const int result2 = set_pe_threshold(1, global_pe);
-      if (result1 != 0 || result2 != 0) {
-        spectrum_i -= 1;
-        // At least one channel is out of bounds, spectrum scan finished.
-        Serial.println("# Threshold scan finished.");
-        print_spectrum();
-
-        mode = idling;
-      }
-
-      if (settings.dynamic_integration_time) {
-        /* Adjust the integration time based on the last measured frequency */
-        if (counts == 0) {
-            set_integration_time(settings.integration_time + 1000);
-            Serial.print("# new integration time = ");
-            Serial.println(settings.integration_time);
-        } else {
-            const unsigned long new_time = 100 * (settings.integration_time * sqrt(counts)) / counts;
-            set_integration_time(max(10, new_time));
-            Serial.print("# new integration time = ");
-            Serial.println(settings.integration_time);
-        }
-      }
+    if (settings.dynamic_integration_time) {
+      adjust_integration_time();
     }
+  }
+}
+
+void loop() {
+  if(mode == idling) {
+    loop_idling();
+  } else if (mode == scanning_single) {
+    loop_scanning_single();
+  } else if (mode == scanning) {
+    loop_scanning();
   }
 }
