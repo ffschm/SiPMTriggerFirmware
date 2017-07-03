@@ -215,18 +215,13 @@ void command_set_thr() {
 
 void command_scan_thr() {
   const byte channel = parse_integer<byte>(1, signal_channels) - 1;
-  const double value = parse_double();
 
-  const int result = set_pe_threshold(channel, 0);
-  if (result != 0) {
-    Serial.println("# Error: Can't start threshold scan, 0p.e. is already out of bounds.");
-    Serial.println("# Check gain and offset and try again.");
-  }
+  set_threshold(channel, 0);
 
   // spectrum_step = 1.0 / min(gain[0], gain[1]);
   spectrum0.step = 1;
   spectrum0.min = 0;
-  spectrum0.max = DBL_MAX;
+  spectrum0.max = 255;
   spectrum0.i = 0;
   scanning_channel = channel;
   mode = scanning_single;
@@ -496,9 +491,8 @@ void loop_scanning_single() {
     print_interrupts();
 
     spectrum0.i += 1;
-    const double global_pe = spectrum0.min + spectrum0.i * spectrum0.step;
-    const int result = set_pe_threshold(scanning_channel, global_pe);
-    if (global_pe > spectrum0.max || result != 0) {
+    set_threshold(scanning_channel, spectrum0.i);
+    if (spectrum0.i > spectrum0.max) {
       spectrum0.i -= 1;
       // The next threshold is out of bounds, spectrum scan finished.
       Serial.println("# Threshold scan finished.");
