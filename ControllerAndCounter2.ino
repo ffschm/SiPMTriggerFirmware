@@ -237,8 +237,9 @@ void command_scan_thr() {
 }
 
 void command_scan_pe_thr() {
-  const int result1 = set_pe_threshold(0, 0);
-  const int result2 = set_pe_threshold(1, 0);
+  const double min_offset = -min(offset[0]/gain[0],offset[1]/gain[1]);
+  const int result1 = set_pe_threshold(0, min_offset);
+  const int result2 = set_pe_threshold(1, min_offset);
 
 
   if (result1 != 0 || result2 != 0) {
@@ -249,7 +250,7 @@ void command_scan_pe_thr() {
   // Start scan from 0 p.e. up to the highest possible threshold in fixed steps
   // spectrum0.step = 1.0 / min(gain[0], gain[1]);
   spectrum0.step = 0.1;
-  spectrum0.min = 0;
+  spectrum0.min = min_offset;
   spectrum0.max = DBL_MAX;
   spectrum0.i = 0;
   mode = scanning;
