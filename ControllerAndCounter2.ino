@@ -21,16 +21,20 @@ enum pot_channel {
 
 // Define arduino settings
 struct global_settings {
-  unsigned long integration_time;
-  unsigned long lcd_interval;
+  unsigned long min_integration_time;
+  unsigned long max_integration_time;
+  double desired_rel_freq_error;
   bool dynamic_integration_time;
 
+  unsigned long lcd_interval;
   bool display_enabled;
 };
 
-global_settings settings = {.integration_time = 1000,
-                            .lcd_interval = 1000,
+global_settings settings = {.min_integration_time = 100,
+                            .max_integration_time = 5000,
+                            .desired_rel_freq_error = 0.04,
                             .dynamic_integration_time = true,
+                            .lcd_interval = 1000,
                             .display_enabled = false};
 
 
@@ -38,6 +42,7 @@ global_settings settings = {.integration_time = 1000,
 volatile unsigned long irq_count;
 unsigned long counts = 0;
 float humidity = 0, temperature = 0, pressure = 0;
+unsigned long integration_time = 1000;
 
 // Declare counter for periodic updates when idling
 unsigned long last_lcd_update = 0;
@@ -176,26 +181,37 @@ bool serial_byte_received() {
  * ################### */
 
 void set_integration_time(const unsigned long time) {
-    settings.integration_time = time;
+    integration_time = time;
     FreqCount.end();
-    FreqCount.begin(settings.integration_time);
+    FreqCount.begin(integration_time);
 }
 
 void adjust_integration_time() {
-  /* Adjust the integration time based on the last measured frequency */
+  /* Adjust the integration time based on the last measured frequency.
+   * The new integration time is calculated such that the relative error
+   * of the next frequency measurement will equal `desired_rel_freq_error`.
+   *
+   * If the calculated integration time is lower/higher than
+   * `max_integration_time`/`min_integration_time` it is capped to the
+   * respective value.
+   *
+   * If the last measurement didn't capture a single event,
+   * the integration time is also set to `max_integration_time`.
+   */
+  unsigned long new_time = integration_time;
+
   if (counts == 0) {
-      set_integration_time(settings.integration_time + 1000);
-      Serial.print("# new integration time = ");
-      Serial.println(settings.integration_time);
+      new_time = settings.max_integration_time;
   } else {
-      unsigned long new_time = 100 * (settings.integration_time * sqrt(counts)) / counts;
-      if (new_time>5000) {
-        new_time = 5000;
-      }
-      set_integration_time(max(100, new_time));
-      Serial.print("# new integration time = ");
-      Serial.println(settings.integration_time);
+      new_time = (1 / settings.desired_rel_freq_error) * (integration_time / sqrt(counts));
+
+      new_time = max(new_time, settings.min_integration_time);
+      new_time = min(new_time, settings.max_integration_time);
   }
+
+  set_integration_time(new_time);
+  Serial.print("# new integration time = ");
+  Serial.println(integration_time);
 }
 
 void command_set_time() {
@@ -331,7 +347,7 @@ void set_threshold(const size_t channel, const byte value) {
   // Start a new frequency measurement
   // (prevents threshold changes to take place during a single measurement)
   FreqCount.end();
-  FreqCount.begin(settings.integration_time);
+  FreqCount.begin(integration_time);
 }
 
 
@@ -375,7 +391,7 @@ void print_interrupts() {
   Serial.print(effective_thr(1));
   Serial.print("  ");
 
-  const double freq = counts * (1000 / (double) settings.integration_time);
+  const double freq = counts * (1000 / (double) integration_time);
   Serial.print(freq);
   Serial.print(" ");
   Serial.println(sqrt(freq));
@@ -416,7 +432,7 @@ void lcd_print_interrupts() {
 
     lcd.setCursor(0, 2);
     lcd.print("Rate ");
-    lcd.print(counts * (1000 / (double) settings.integration_time));
+    lcd.print(counts * (1000 / (double) integration_time));
     lcd.print(" Hz");
 
     lcd.setCursor(0, 3);
@@ -443,7 +459,7 @@ void setup() {
   setup_thermometer();
   update_temperature();
 
-  FreqCount.begin(settings.integration_time);
+  FreqCount.begin(integration_time);
   Serial.println("# CH1(THR) CH2(THR)  CH1(THR/pe) CH2(THR/pe)  counts sqrt(counts)");
 }
 
@@ -466,7 +482,7 @@ void loop_idling() {
     update_lcd();
   }
 
-  if (current_millis - last_serial_update >= settings.integration_time) {
+  if (current_millis - last_serial_update >= integration_time) {
     last_serial_update = current_millis;
     print_interrupts();
   }
@@ -485,7 +501,7 @@ void loop_scanning_single() {
     /* Store the latest frequency measurement and start a new measurement with updated threshold */
     counts = FreqCount.read();
 
-    const double freq = counts * (1000 / (double) settings.integration_time);
+    const double freq = counts * (1000 / (double) integration_time);
     spectrum0.freq[spectrum0.i] = freq;
     spectrum0.freq_err[spectrum0.i] = sqrt(freq);
 
@@ -518,7 +534,7 @@ void loop_scanning() {
     /* Store the latest frequency measurement and start a new measurement with updated threshold */
     counts = FreqCount.read();
 
-    const double freq = counts * (1000 / (double) settings.integration_time);
+    const double freq = counts * (1000 / (double) integration_time);
     spectrum0.freq[spectrum0.i] = freq;
     spectrum0.freq_err[spectrum0.i] = sqrt(freq);
 
