@@ -395,7 +395,7 @@ void print_interrupts() {
   const double freq_err = (1000 / (double) integration_time ) * sqrt(counts);
   Serial.print(freq);
   Serial.print(" ");
-  Serial.println();
+  Serial.println(freq_err);
 }
 
 void print_spectrum() {
