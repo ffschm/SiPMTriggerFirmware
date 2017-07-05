@@ -392,9 +392,10 @@ void print_interrupts() {
   Serial.print("  ");
 
   const double freq = counts * (1000 / (double) integration_time);
+  const double freq_err = (1000 / (double) integration_time ) * sqrt(counts);
   Serial.print(freq);
   Serial.print(" ");
-  Serial.println(sqrt(freq));
+  Serial.println();
 }
 
 void print_spectrum() {
@@ -502,8 +503,7 @@ void loop_scanning_single() {
     counts = FreqCount.read();
 
     const double freq = counts * (1000 / (double) integration_time);
-    spectrum0.freq[spectrum0.i] = freq;
-    spectrum0.freq_err[spectrum0.i] = sqrt(freq);
+    spectrum0.freq_err[spectrum0.i] = (1000 / (double) integration_time ) * sqrt(counts);
 
     print_interrupts();
 
@@ -536,7 +536,7 @@ void loop_scanning() {
 
     const double freq = counts * (1000 / (double) integration_time);
     spectrum0.freq[spectrum0.i] = freq;
-    spectrum0.freq_err[spectrum0.i] = sqrt(freq);
+    spectrum0.freq_err[spectrum0.i] = (1000 / (double) integration_time ) * sqrt(counts);
 
     print_interrupts();
 
