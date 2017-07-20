@@ -7,17 +7,32 @@
 #include <limits.h>
 #include <float.h>
 
+#define Scinti_Readout_HW_VERSION v2
 
-// Define board properties (currently for SiPMTrigger v4)
-const size_t channels = 4;
-const size_t signal_channels = 2;
 
-enum pot_channel {
-  CH1_THR = 2,
-  CH2_THR = 1,
-  CH1_WIDTH = 0,
-  CH2_WIDTH = 3
-};
+#if SCINTI_READOUT_HW_VERSION == v1
+  // Define board properties for SiPMTrigger v4 / Scinti_Readout v1
+  const size_t channels = 4;
+  const size_t signal_channels = 2;
+  
+  enum pot_channel {
+    CH1_THR = 2,
+    CH2_THR = 1,
+    CH1_WIDTH = 0,
+    CH2_WIDTH = 3
+  };
+#elif SCINTI_READOUT_HW_VERSION == v2
+  // Define board properties for SiPMTrigger v5 / Scinti_Readout v2
+  const size_t channels = 2;
+  const size_t signal_channels = 2;
+  
+  enum pot_channel {
+    CH1_THR = 0,
+    CH2_THR = 1
+  };
+#else
+  #error Unsupported SCINTI_RADOUT_HW_VERSION
+#endif /* SCINTI_READOUT_HW_VERSION */
 
 // Define arduino settings
 struct global_settings {
