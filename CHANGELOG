@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased
+
+## 0.8
 - Changed `SCAN THR` to scan a single channel in DAC values (like it was done pre-0.7).
 - Fixed the automatic adjustment of the integration time.
 - Fixed the calculation of the frequency error.
