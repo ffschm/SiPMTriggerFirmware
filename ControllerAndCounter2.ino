@@ -7,10 +7,10 @@
 #include <limits.h>
 #include <float.h>
 
-#define Scinti_Readout_HW_VERSION v2
+#define SCINTI_READOUT_HW_VERSION 2
 
 
-#if SCINTI_READOUT_HW_VERSION == v1
+#if SCINTI_READOUT_HW_VERSION == 1
   // Define board properties for SiPMTrigger v4 / Scinti_Readout v1
   const size_t channels = 4;
   const size_t signal_channels = 2;
@@ -21,7 +21,7 @@
     CH1_WIDTH = 0,
     CH2_WIDTH = 3
   };
-#elif SCINTI_READOUT_HW_VERSION == v2
+#elif SCINTI_READOUT_HW_VERSION == 2
   // Define board properties for SiPMTrigger v5 / Scinti_Readout v2
   const size_t channels = 2;
   const size_t signal_channels = 2;
@@ -31,7 +31,7 @@
     CH2_THR = 1
   };
 #else
-  #error Unsupported SCINTI_RADOUT_HW_VERSION
+  #error Unsupported hardware version SCINTI_RADOUT_HW_VERSION
 #endif /* SCINTI_READOUT_HW_VERSION */
 
 // Define arduino settings
@@ -473,7 +473,9 @@ void lcd_print_interrupts() {
 
 void setup() {
   Serial.begin(9600);
-  Serial.print("# SiPMTrigger v4 Control v");
+  Serial.print("# SiPMTrigger Control HW v");
+  Serial.print( SCINTI_READOUT_HW_VERSION );
+  Serial.print(", SW v");
   Serial.println(SW_VERSION);
 
   poti.begin();
