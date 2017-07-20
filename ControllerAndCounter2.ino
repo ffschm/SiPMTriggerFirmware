@@ -230,9 +230,13 @@ void command_set_thr() {
 }
 
 void command_scan_thr() {
-  const byte channel = parse_integer<byte>(1, signal_channels) - 1;
+  const byte result = parse_integer<byte>(1, signal_channels);
+  if (result == NULL) {
+    return;
+  }
 
-  set_threshold(channel, 0);
+  // channel 1/2 is the internal channel 0/1.
+  const byte channel = result - 1;
 
   // spectrum_step = 1.0 / min(gain[0], gain[1]);
   spectrum0.step = 1;
@@ -241,6 +245,9 @@ void command_scan_thr() {
   spectrum0.i = 0;
   scanning_channel = channel;
   mode = scanning_single;
+
+  // Start scanning
+  set_threshold(channel, spectrum0.min);
 
   // Disable the other channel during the scan to prevent cross-talk
   if (scanning_channel == 1) {
@@ -256,7 +263,6 @@ void command_scan_pe_thr() {
   const double min_offset = -min(offset[0]/gain[0],offset[1]/gain[1]);
   const int result1 = set_pe_threshold(0, min_offset);
   const int result2 = set_pe_threshold(1, min_offset);
-
 
   if (result1 != 0 || result2 != 0) {
     Serial.println("# Error: Can't start threshold scan, 0p.e. is already out of bounds.");
@@ -410,6 +416,7 @@ void print_spectrum() {
   Serial.print(" ");
   Serial.println(offset[1]);
 
+  Serial.println("# THR/p.e. R/Hz deltaR/Hz");
   for (size_t i = 0; i <= spectrum0.i; i++) {
     Serial.print(spectrum0.min + spectrum0.step * i);
     Serial.print(" ");
@@ -417,6 +424,7 @@ void print_spectrum() {
     Serial.print(" ");
     Serial.println(spectrum0.freq_err[i]);
   }
+  Serial.println("# END Spectrum.");
 }
 
 
@@ -503,6 +511,7 @@ void loop_scanning_single() {
     counts = FreqCount.read();
 
     const double freq = counts * (1000 / (double) integration_time);
+    spectrum0.freq[spectrum0.i] = freq;
     spectrum0.freq_err[spectrum0.i] = (1000 / (double) integration_time ) * sqrt(counts);
 
     print_interrupts();
@@ -513,7 +522,6 @@ void loop_scanning_single() {
       spectrum0.i -= 1;
       // The next threshold is out of bounds, spectrum scan finished.
       Serial.println("# Threshold scan finished.");
-      print_spectrum();
 
       mode = idling;
     }
