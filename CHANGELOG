@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased
+- Changed `SCAN THR` to scan a single channel in DAC values (like it was done pre-0.7).
+- Fixed the automatic adjustment of the integration time.
+- Fixed the calculation of the frequency error.
+- Added support for the Scinti_Readout hardware version v2.
 
 ## 0.7
 - Extracted AD5144 driver into a seperate library.
