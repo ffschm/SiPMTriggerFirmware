@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Fixed the scanning commands to reset the integration time at the start of a scan.
+- Enabled automated integration time adjustment for all scanning commands.
 
 ## 0.8
 - Changed `SCAN THR` to scan a single channel in DAC values (like it was done pre-0.7).

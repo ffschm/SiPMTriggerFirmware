@@ -568,6 +568,10 @@ void loop_scanning_single() {
 
       mode = idling;
     }
+
+    if (settings.dynamic_integration_time) {
+      adjust_integration_time();
+    }
   }
 }
 
