@@ -227,8 +227,10 @@ void adjust_integration_time() {
   }
 
   set_integration_time(new_time);
-  Serial.print("# new integration time = ");
-  Serial.println(integration_time);
+
+  // DEBUG_print
+  // Serial.print("# integration time = ");
+  // Serial.println(integration_time);
 }
 
 void command_set_time() {
@@ -237,6 +239,9 @@ void command_set_time() {
   if (time != NULL) {
     set_integration_time(time);
   }
+
+  Serial.print("# integration_time = ");
+  Serial.println(integration_time);
 }
 
 void command_set_thr() {
@@ -312,6 +317,11 @@ void command_set_gain() {
     return;
   }
   gain[channel - 1] = value;
+
+  Serial.print("# gain_CH");
+  Serial.print(channel);
+  Serial.print(" = ");
+  Serial.println(gain[channel -1]);
 }
 
 void command_set_offset() {
@@ -319,6 +329,11 @@ void command_set_offset() {
   const double value = parse_double();
 
   offset[channel - 1] = value;
+
+  Serial.print("# offset_CH");
+  Serial.print(channel);
+  Serial.println(" = ");
+  Serial.println(offset[channel -1]);
 }
 
 void command_set_pe_thr() {
