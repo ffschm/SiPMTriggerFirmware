@@ -332,7 +332,7 @@ void command_set_offset() {
 
   Serial.print("# offset_CH");
   Serial.print(channel);
-  Serial.println(" = ");
+  Serial.print(" = ");
   Serial.println(offset[channel -1]);
 }
 
