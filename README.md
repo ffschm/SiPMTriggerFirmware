@@ -3,6 +3,9 @@ This firmware allows an arduino to be used as a controller of the digital potent
 as well as a simple scaler.
 Please note: The combination of slow control and data aquisition has several drawbacks but can be choosen if handled carefully.
 
+Currently there are two versions of the SiPMTrigger board (`Scinti_Readout v1` and `Scinti_Readout v2`). Due to different channel mappings,
+each board requires its own firmware. Please edit the line `#define SCINTI_READOUT_HW_VERSION 2` according to your needs.
+
 # Installation
 
 This sketch depends on the following libraries:
