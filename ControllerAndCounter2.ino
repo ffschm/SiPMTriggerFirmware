@@ -386,12 +386,14 @@ void set_threshold(const size_t channel, const byte value) {
 
   threshold[channel] = value;
 
-  // Wait 35us until the switching noise is gone
-  delayMicroseconds(35);
 
   // Start a new frequency measurement
   // (prevents threshold changes to take place during a single measurement)
   FreqCount.end();
+
+  // Wait until the switching noise is gone
+  delayMicroseconds(200);
+
   FreqCount.begin(integration_time);
 }
 
