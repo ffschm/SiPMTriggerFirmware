@@ -39,6 +39,7 @@
 struct global_settings {
   unsigned long min_integration_time;
   unsigned long max_integration_time;
+  unsigned long default_integration_time;
   double desired_rel_freq_error;
   bool dynamic_integration_time;
 
@@ -48,6 +49,7 @@ struct global_settings {
 
 global_settings settings = {.min_integration_time = 100,
                             .max_integration_time = 5000,
+                            .default_integration_time = 1000,
                             .desired_rel_freq_error = 0.04,
                             .dynamic_integration_time = true,
                             .lcd_interval = 1000,
@@ -58,7 +60,7 @@ global_settings settings = {.min_integration_time = 100,
 volatile unsigned long irq_count;
 unsigned long counts = 0;
 float humidity = 0, temperature = 0, pressure = 0;
-unsigned long integration_time = 1000;
+unsigned long integration_time = settings.default_integration_time;
 
 // Declare counter for periodic updates when idling
 unsigned long last_lcd_update = 0;
@@ -271,6 +273,9 @@ void command_scan_thr() {
     set_threshold(1, 255);
   }
 
+  // Reset integration time
+  integration_time = settings.default_integration_time;
+
   Serial.println("# Threshold scan for a single channel started. Please wait...");
 }
 
@@ -291,6 +296,10 @@ void command_scan_pe_thr() {
   spectrum0.max = DBL_MAX;
   spectrum0.i = 0;
   mode = scanning;
+
+  // Reset integration time
+  integration_time = settings.default_integration_time;
+
   Serial.println("# Threshold scan started. Please wait...");
 }
 
