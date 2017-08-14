@@ -6,7 +6,7 @@ Please note: The combination of slow control and data aquisition has several dra
 Currently there are two versions of the SiPMTrigger board (`Scinti_Readout v1` and `Scinti_Readout v2`). Due to different channel mappings,
 each board requires its own firmware. Please edit the line `#define SCINTI_READOUT_HW_VERSION 2` according to your needs.
 
-# Installation
+## Installation
 
 This sketch depends on the following libraries:
 - [FreqCount](https://github.com/PaulStoffregen/FreqCount)
@@ -30,7 +30,7 @@ In the follwing table the arduino pins used by this sketch are listed.
 | MISO, MOSI, SCK, +5V, GND (ICSP header) | both | SPI to SiPM Trigger board |
 | SDA, SCL, +3.3V, GND | both | I2C to BME280 environmental sensor |
 
-# Commands
+## Commands
 
 | Comand | Description |
 | ------ | ----------- |
@@ -43,7 +43,8 @@ In the follwing table the arduino pins used by this sketch are listed.
 | `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
 | `GET TEMP`| Measure the temperature (&humidity&pressure) and print it via the serial console. |
 
-# Output
+## Output
+
 Example:
 ```
 # SiPMTrigger v4 Control v0.7pre
@@ -59,13 +60,25 @@ Example:
 
 The output contains the threshold settings of the discriminator for both signal channels, as well as the trigger rate with error of the signal on pin 47 of the arduino in the last integration time interval.
 
-`Scinit_Readout v2`:
+## Hardware
+
+The following table shows the mapping of internal potentiometer channels to their function on the different boards.
+
+### `Scinit_Readout v1`
+
 | Potentiometer channel | Function |
 | --------------------- | -------- |
 | channel 0             | signal channel 1 pulse width |
 | channel 1             | signal channel 2 threshold |
 | channel 2             | signal channel 1 threshold |
 | channel 3             | signal channel 2 pulse width |
+
+### `Scinit_Readout v2`
+
+| Potentiometer channel | Function |
+| --------------------- | -------- |
+| channel 0             | signal channel 1 threshold |
+| channel 1             | signal channel 2 threshold |
 
 ## License
 
