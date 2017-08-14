@@ -58,7 +58,7 @@ Example:
 8 0  8.00 0.00  2263700.00 1504.56
 ```
 
-The output contains the threshold settings of the discriminator for both signal channels, as well as the trigger rate with error of the signal on pin 47 of the arduino in the last integration time interval.
+The output contains the threshold settings of the discriminator for both signal channels, as well as the trigger rate with error of the signal on the frequency input pin in the last integration time interval.
 
 ## Hardware
 
