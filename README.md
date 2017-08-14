@@ -41,7 +41,7 @@ In the follwing table the arduino pins used by this sketch are listed.
 | `SCAN THR $CH`| Scan the threshold of signal channel `CH` by increasing the threshold by 1LSB per step. |
 | `SCAN PE THR`| Scan the thresholds of both signal channels simultaneously from 0p.e. up to the highest possible treshold by increasing them by 0.1p.e. at each tick. |
 | `SET TIME $INTTIME`| Set the integrating time interval to `$INTTIME` (in milliseconds). |
-| `GET TEMP`| Measure the temperature (&humidity&pressure) and print it via the serial console. |
+| `GET TEMP`| Measure the temperature, humidity and pressure and print the results on the serial console. |
 
 ## Output
 
