@@ -521,8 +521,6 @@ void setup() {
  * ################# */
 
 void loop_idling() {
-  handle_commands();
-
   if (FreqCount.available()) {
     counts = FreqCount.read();
   }
@@ -538,6 +536,8 @@ void loop_idling() {
     last_serial_update = current_millis;
     print_interrupts();
   }
+
+  handle_commands();
 }
 
 void loop_scanning_single() {
