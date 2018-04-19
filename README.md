@@ -1,7 +1,7 @@
 # SiPM Trigger Controller&Counter
 This firmware allows an arduino to be used as a controller of the digital potentiometer on the SiPMTrigger board
 as well as a simple scaler.
-Please note: The combination of slow control and data aquisition has several drawbacks but can be choosen if handled carefully.
+Please note: The combination of slow control and data aquisition by the same hardware has several drawbacks, but can be choosen if handled carefully.
 
 Currently there are two versions of the SiPMTrigger board (`Scinti_Readout v1` and `Scinti_Readout v2`). Due to different channel mappings,
 each board requires its own firmware. Please edit the line `#define SCINTI_READOUT_HW_VERSION 2` according to your needs.
@@ -31,6 +31,17 @@ In the follwing table the arduino pins used by this sketch are listed.
 | SDA, SCL, +3.3V, GND | both | I2C to BME280 environmental sensor |
 
 ## Commands
+
+The SiPMTrigger Controller can be controlled interactively via a serial terminal (e.g. minicom/Cutecom).
+The required serial settings are:
+
+Baud rate | 9600
+Data bits | 8
+Parity | None
+Stop bits | 1
+Handshake | None
+
+The following table lists all available commands. For command execution send a newline character.
 
 | Comand | Description |
 | ------ | ----------- |
@@ -79,6 +90,15 @@ The following table shows the mapping of internal potentiometer channels to thei
 | --------------------- | -------- |
 | channel 0             | signal channel 1 threshold |
 | channel 1             | signal channel 2 threshold |
+
+## Scripting
+
+The SiPMTrigger Controller is controlled with the python scripts provided in the folter `contrib`.
+To be able to use these scripts, a capacitor has to be added between the `RESET` and `GND` pin of the Arduino
+to prevent a reset of the microcontroller after each command execution.
+
+The following commands are available:
+
 
 ## License
 
