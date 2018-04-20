@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <float.h>
 
-#define SW_VERSION "0.8"
+#define SW_VERSION "0.9"
 #define SCINTI_READOUT_HW_VERSION 2
 
 
