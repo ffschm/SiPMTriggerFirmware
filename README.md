@@ -98,7 +98,45 @@ To be able to use these scripts, a capacitor has to be added between the `RESET`
 to prevent a reset of the microcontroller after each command execution.
 
 The following commands are available:
+```
+$ ./scan_thr.py --help
+usage: scan_thr.py [-h] [--port PORT] [--channel CHANNEL]
 
+Run a treshold scan on the discriminator of the SiPM Trigger Controller.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --port PORT
+  --channel CHANNEL
+
+$ ./scan_pe_thr.py --help
+usage: scan_pe_thr.py [-h] [--port PORT] [--gain1 GAIN1] [--offset1 OFFSET1]
+                      [--gain2 GAIN2] [--offset2 OFFSET2]
+
+Run a treshold scan on the discriminator of the SiPM Trigger Controller.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --port PORT
+  --gain1 GAIN1
+  --offset1 OFFSET1
+  --gain2 GAIN2
+  --offset2 OFFSET2
+
+$ ./get_calibration.py --help
+usage: get_calibration.py [-h] [-c CHANNEL] thr_1pe thr_2pe
+
+Calculate offset and gain from the first two photopeaks.
+
+positional arguments:
+  thr_1pe
+  thr_2pe
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CHANNEL, --channel CHANNEL
+
+```
 
 ## License
 
