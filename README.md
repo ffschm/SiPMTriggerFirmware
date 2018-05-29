@@ -142,6 +142,38 @@ optional arguments:
 
 ```
 
+### Usage: Measuring the gain & dark count rate of both channels
+
+1. Connect the trigger output of channel 1 with the frequency counter input.
+2. Start a treshold scan of channel 1 and save the result in a file `ch1_dark.dat`:
+
+   ```
+   $ ./contrib/scan_thr.py --port /dev/ttyACM0 --channel 1 > ch1_dark.dat
+   ```
+   NOTE: The arduino may be available on a different port on your system, adjust accordingly.
+3. Optional: Abort the threshold scan with Ctrl-C as soon as you think you've measured at least
+   three steps in the rate displayed (corresponding to a threshold of more than three photoelectrons)
+4. Plot the data, e.g. with the provided [gnuplot-Script](contrib/thr_scan_example.plot).
+   - Copy the script to your path:
+     ```
+     $ cp ./contrib/thr_scan_example.plot ./thr_scan_ch1.plot
+     ```
+   - Open it with a text editor and adjust it to plot your data. Replace `example_data/ch1.dat`
+     with the name of your datafile and remove the trailing backslash and all following lines,
+     unless you want to plot multiple channels:
+     ```
+     plot "example_data/ch1.dat" w errorlines lt 1 pt 5, \
+     "example_data/ch2.dat" w errorlines lt 1 pt 4, \
+     ```
+
+   - Execute it in the the terminal.
+     ```
+     $ ./thr_scan_ch1.plot
+     ```
+   The resulting eps-file is now available as specified in the gnuplot-script.
+
+There are example plots for the [single channel threshold scans](contrib/thr_scan_example.eps) and for the [coincidence spectrum](contrib/pe_thr_scan_example.eps) available.
+
 ## License
 
 Licensed under the [GPLv3](LICENSE) or later.
